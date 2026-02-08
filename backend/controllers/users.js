@@ -1,10 +1,10 @@
-const bcrypt = require("bcrypt");
-const { IsNull, In } = require("typeorm");
+const bcrypt = require('bcrypt');
+const { IsNull, In } = require('typeorm');
 
-const config = require("../config/index");
-const { dataSource } = require("../db/data-source");
-const logger = require("../utils/logger")("UsersController");
-const generateJWT = require("../utils/generateJWT");
+const config = require('../config/index');
+const { dataSource } = require('../db/data-source');
+const logger = require('../utils/logger')('UsersController');
+const generateJWT = require('../utils/generateJWT');
 
 const passwordPattern = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{10,16}/;
 
@@ -13,7 +13,7 @@ function isUndefined(value) {
 }
 
 function isNotValidSting(value) {
-  return typeof value !== "string" || value.trim().length === 0 || value === "";
+  return typeof value !== 'string' || value.trim().length === 0 || value === '';
 }
 
 class UsersController {
@@ -28,34 +28,34 @@ class UsersController {
         isUndefined(password) ||
         isNotValidSting(password)
       ) {
-        logger.warn("欄位未填寫正確");
+        logger.warn('欄位未填寫正確');
         res.status(400).json({
-          status: "failed",
-          message: "欄位未填寫正確",
+          status: 'failed',
+          message: '欄位未填寫正確',
         });
         return;
       }
       if (!passwordPattern.test(password)) {
         logger.warn(
-          "建立使用者錯誤: 密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字",
+          '建立使用者錯誤: 密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字',
         );
         res.status(400).json({
-          status: "failed",
+          status: 'failed',
           message:
-            "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字",
+            '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字',
         });
         return;
       }
-      const userRepository = dataSource.getRepository("User");
+      const userRepository = dataSource.getRepository('User');
       const existingUser = await userRepository.findOne({
         where: { email },
       });
 
       if (existingUser) {
-        logger.warn("建立使用者錯誤: Email 已被使用");
+        logger.warn('建立使用者錯誤: Email 已被使用');
         res.status(409).json({
-          status: "failed",
-          message: "Email 已被使用",
+          status: 'failed',
+          message: 'Email 已被使用',
         });
         return;
       }
@@ -64,13 +64,13 @@ class UsersController {
       const newUser = userRepository.create({
         name,
         email,
-        role: "USER",
+        role: 'USER',
         password: hashPassword,
       });
       const savedUser = await userRepository.save(newUser);
-      logger.info("新建立的使用者ID:", savedUser.id);
+      logger.info('新建立的使用者ID:', savedUser.id);
       res.status(201).json({
-        status: "success",
+        status: 'success',
         data: {
           user: {
             id: savedUser.id,
@@ -79,7 +79,7 @@ class UsersController {
         },
       });
     } catch (error) {
-      logger.error("建立使用者錯誤:", error);
+      logger.error('建立使用者錯誤:', error);
       next(error);
     }
   }
@@ -94,34 +94,34 @@ class UsersController {
         isUndefined(password) ||
         isNotValidSting(password)
       ) {
-        logger.warn("欄位未填寫正確");
+        logger.warn('欄位未填寫正確');
         res.status(400).json({
-          status: "failed",
-          message: "欄位未填寫正確",
+          status: 'failed',
+          message: '欄位未填寫正確',
         });
         return;
       }
       if (!passwordPattern.test(password)) {
         logger.warn(
-          "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字",
+          '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字',
         );
         res.status(400).json({
-          status: "failed",
+          status: 'failed',
           message:
-            "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字",
+            '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字',
         });
         return;
       }
-      const userRepository = dataSource.getRepository("User");
+      const userRepository = dataSource.getRepository('User');
       const existingUser = await userRepository.findOne({
-        select: ["id", "name", "password", "role"],
+        select: ['id', 'name', 'password', 'role'],
         where: { email },
       });
 
       if (!existingUser) {
         res.status(400).json({
-          status: "failed",
-          message: "使用者不存在或密碼輸入錯誤",
+          status: 'failed',
+          message: '使用者不存在或密碼輸入錯誤',
         });
         return;
       }
@@ -129,8 +129,8 @@ class UsersController {
       const isMatch = await bcrypt.compare(password, existingUser.password);
       if (!isMatch) {
         res.status(400).json({
-          status: "failed",
-          message: "使用者不存在或密碼輸入錯誤",
+          status: 'failed',
+          message: '使用者不存在或密碼輸入錯誤',
         });
         return;
       }
@@ -139,14 +139,14 @@ class UsersController {
           id: existingUser.id,
           role: existingUser.role,
         },
-        config.get("secret.jwtSecret"),
+        config.get('secret.jwtSecret'),
         {
-          expiresIn: `${config.get("secret.jwtExpiresDay")}`,
+          expiresIn: `${config.get('secret.jwtExpiresDay')}`,
         },
       );
 
       res.status(201).json({
-        status: "success",
+        status: 'success',
         data: {
           token,
           user: {
@@ -155,7 +155,7 @@ class UsersController {
         },
       });
     } catch (error) {
-      logger.error("登入錯誤:", error);
+      logger.error('登入錯誤:', error);
       next(error);
     }
   }
@@ -163,19 +163,19 @@ class UsersController {
   static async getProfile(req, res, next) {
     try {
       const { id } = req.user;
-      const userRepository = dataSource.getRepository("User");
+      const userRepository = dataSource.getRepository('User');
       const user = await userRepository.findOne({
-        select: ["name", "email"],
+        select: ['name', 'email'],
         where: { id },
       });
       res.status(200).json({
-        status: "success",
+        status: 'success',
         data: {
           user,
         },
       });
     } catch (error) {
-      logger.error("取得使用者資料錯誤:", error);
+      logger.error('取得使用者資料錯誤:', error);
       next(error);
     }
   }
@@ -183,7 +183,7 @@ class UsersController {
   static async getCreditPackage(req, res, next) {
     try {
       const { id } = req.user;
-      const creditPurchaseRepo = dataSource.getRepository("CreditPurchase");
+      const creditPurchaseRepo = dataSource.getRepository('CreditPurchase');
       const creditPurchase = await creditPurchaseRepo.find({
         select: {
           purchased_credits: true,
@@ -200,11 +200,11 @@ class UsersController {
           CreditPackage: true,
         },
         order: {
-          purchaseAt: "DESC",
+          purchaseAt: 'DESC',
         },
       });
       res.status(200).json({
-        status: "success",
+        status: 'success',
         data: creditPurchase.map((item) => {
           return {
             name: item.CreditPackage.name,
@@ -215,7 +215,7 @@ class UsersController {
         }),
       });
     } catch (error) {
-      logger.error("取得使用者資料錯誤:", error);
+      logger.error('取得使用者資料錯誤:', error);
       next(error);
     }
   }
@@ -225,24 +225,24 @@ class UsersController {
       const { id } = req.user;
       const { name } = req.body;
       if (isUndefined(name) || isNotValidSting(name)) {
-        logger.warn("欄位未填寫正確");
+        logger.warn('欄位未填寫正確');
         res.status(400).json({
-          status: "failed",
-          message: "欄位未填寫正確",
+          status: 'failed',
+          message: '欄位未填寫正確',
         });
         return;
       }
-      const userRepository = dataSource.getRepository("User");
+      const userRepository = dataSource.getRepository('User');
       const user = await userRepository.findOne({
-        select: ["name"],
+        select: ['name'],
         where: {
           id,
         },
       });
       if (user.name === name) {
         res.status(400).json({
-          status: "failed",
-          message: "使用者名稱未變更",
+          status: 'failed',
+          message: '使用者名稱未變更',
         });
         return;
       }
@@ -257,25 +257,25 @@ class UsersController {
       );
       if (updatedResult.affected === 0) {
         res.status(400).json({
-          status: "failed",
-          message: "更新使用者資料失敗",
+          status: 'failed',
+          message: '更新使用者資料失敗',
         });
         return;
       }
       const result = await userRepository.findOne({
-        select: ["name"],
+        select: ['name'],
         where: {
           id,
         },
       });
       res.status(200).json({
-        status: "success",
+        status: 'success',
         data: {
           user: result,
         },
       });
     } catch (error) {
-      logger.error("取得使用者資料錯誤:", error);
+      logger.error('取得使用者資料錯誤:', error);
       next(error);
     }
   }
@@ -296,10 +296,10 @@ class UsersController {
         isUndefined(confirmNewPassword) ||
         isNotValidSting(confirmNewPassword)
       ) {
-        logger.warn("欄位未填寫正確");
+        logger.warn('欄位未填寫正確');
         res.status(400).json({
-          status: "failed",
-          message: "欄位未填寫正確",
+          status: 'failed',
+          message: '欄位未填寫正確',
         });
         return;
       }
@@ -309,41 +309,41 @@ class UsersController {
         !passwordPattern.test(confirmNewPassword)
       ) {
         logger.warn(
-          "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字",
+          '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字',
         );
         res.status(400).json({
-          status: "failed",
+          status: 'failed',
           message:
-            "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字",
+            '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字',
         });
         return;
       }
       if (newPassword === password) {
-        logger.warn("新密碼不能與舊密碼相同");
+        logger.warn('新密碼不能與舊密碼相同');
         res.status(400).json({
-          status: "failed",
-          message: "新密碼不能與舊密碼相同",
+          status: 'failed',
+          message: '新密碼不能與舊密碼相同',
         });
         return;
       }
       if (newPassword !== confirmNewPassword) {
-        logger.warn("新密碼與驗證新密碼不一致");
+        logger.warn('新密碼與驗證新密碼不一致');
         res.status(400).json({
-          status: "failed",
-          message: "新密碼與驗證新密碼不一致",
+          status: 'failed',
+          message: '新密碼與驗證新密碼不一致',
         });
         return;
       }
-      const userRepository = dataSource.getRepository("User");
+      const userRepository = dataSource.getRepository('User');
       const existingUser = await userRepository.findOne({
-        select: ["password"],
+        select: ['password'],
         where: { id },
       });
       const isMatch = await bcrypt.compare(password, existingUser.password);
       if (!isMatch) {
         res.status(400).json({
-          status: "failed",
-          message: "密碼輸入錯誤",
+          status: 'failed',
+          message: '密碼輸入錯誤',
         });
         return;
       }
@@ -359,17 +359,17 @@ class UsersController {
       );
       if (updatedResult.affected === 0) {
         res.status(400).json({
-          status: "failed",
-          message: "更新密碼失敗",
+          status: 'failed',
+          message: '更新密碼失敗',
         });
         return;
       }
       res.status(200).json({
-        status: "success",
+        status: 'success',
         data: null,
       });
     } catch (error) {
-      logger.error("取得使用者資料錯誤:", error);
+      logger.error('取得使用者資料錯誤:', error);
       next(error);
     }
   }
@@ -377,9 +377,9 @@ class UsersController {
   static async getCourseBooking(req, res, next) {
     try {
       const { id } = req.user;
-      const creditPurchaseRepo = dataSource.getRepository("CreditPurchase");
-      const courseBookingRepo = dataSource.getRepository("CourseBooking");
-      const userCredit = await creditPurchaseRepo.sum("purchased_credits", {
+      const creditPurchaseRepo = dataSource.getRepository('CreditPurchase');
+      const courseBookingRepo = dataSource.getRepository('CourseBooking');
+      const userCredit = await creditPurchaseRepo.sum('purchased_credits', {
         user_id: id,
       });
       const userUsedCredit = await courseBookingRepo.count({
@@ -405,7 +405,7 @@ class UsersController {
         },
         order: {
           Course: {
-            start_at: "ASC",
+            start_at: 'ASC',
           },
         },
         relations: {
@@ -418,9 +418,9 @@ class UsersController {
           coachUserIdMap[courseBooking.Course.user_id] =
             courseBooking.Course.user_id;
         });
-        const userRepo = dataSource.getRepository("User");
+        const userRepo = dataSource.getRepository('User');
         const coachUsers = await userRepo.find({
-          select: ["id", "name"],
+          select: ['id', 'name'],
           where: {
             id: In(Object.values(coachUserIdMap)),
           },
@@ -432,7 +432,7 @@ class UsersController {
         logger.debug(`coachUsers: ${JSON.stringify(coachUsers)}`);
       }
       res.status(200).json({
-        status: "success",
+        status: 'success',
         data: {
           credit_remain: userCredit - userUsedCredit,
           credit_usage: userUsedCredit,
@@ -450,7 +450,7 @@ class UsersController {
         },
       });
     } catch (error) {
-      logger.error("取得使用者資料錯誤:", error);
+      logger.error('取得使用者資料錯誤:', error);
       next(error);
     }
   }

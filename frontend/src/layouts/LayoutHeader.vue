@@ -195,11 +195,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useRouter } from "vue-router";
-import { useUserStore } from "../stores/user.js";
-import { removeCookie } from "../utils/cookie.js";
+import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '../stores/user.js';
+import { removeCookie } from '../utils/cookie.js';
 
 const router = useRouter();
 const { name, role } = storeToRefs(useUserStore());
@@ -208,9 +208,9 @@ const { setCurrentUser } = useUserStore();
 const isMobileMenuOpen = ref(false);
 
 function logout() {
-  removeCookie("token");
-  setCurrentUser({ name: "", role: "" });
-  router.push("/");
+  removeCookie('token');
+  setCurrentUser({ name: '', role: '' });
+  router.push('/');
 }
 
 const toggleMobileMenu = () => {
